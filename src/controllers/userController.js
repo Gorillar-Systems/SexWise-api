@@ -1,10 +1,124 @@
-// import { registerUserValidator, loginUserValidator } from "../validators/user.js";
-// import { UserModel } from "../models/usermodel.js";
-// import bcrypt from "bcryptjs";
-// import jwt from "jsonwebtoken";
-// import { mailTransporter } from "../utils/mail.js";
-// import { TodoModel } from "../models/todo.js";
+import { registerUserValidator, loginUserValidator } from "../validators/user.js";
+import { UserModel } from "../models/userModel.js";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import { mailTransporter } from "../utils/mail.js";
 
+// Register User
+export const registerUser = async (req, res, next) => {
+    try {
+        // Validate user input
+        const { error, value } = registerUserValidator.validate(req.body);
+        if (error) {
+            return res.status(422).json(error);
+        }
+        // console.log(value)
+        // Check if user already exists
+        const existingUser = await UserModel.findOne({ email: value.email });
+        if (existingUser) {
+            return res.status(409).json({ message: 'User already exist' });
+        }
+
+        // Hash their password
+        const hashedPassword = bcrypt.hashSync(value.password, 10);
+
+        // create new user
+        const newUser = new UserModel({
+            ...value,
+            password: hashedPassword,
+        });
+        await newUser.save();
+        console.log(newUser)
+        // Send user confirmation email
+        await mailTransporter.sendMail
+            ({
+                from: process.env.MAIL_USER,
+                to: value.email,
+                subject: "User signup",
+                text: "User Registration Successfully"
+            });
+        // Respond to request
+        res.status(201).json({ message: 'User registered successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error });
+    }
+};
+
+// Login User 
+export const loginUser = async (req, res, next) => {
+    try {
+        // validate user input
+        const { email, password } = loginUserValidator.validate(req.body);
+        // Find the user by email
+        const user = await UserModel.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ message: 'User does not exist' });
+        }
+        // check password 
+        const isMatch = bcrypt.compareSync(password, user.password);
+        if (!isMatch) {
+            return res.status(401).json({ message: 'Invalid credentials' });
+        }
+        // Generate JWT token for user
+        const token = jwt.sign({ id: user.id },
+            JWT_PRIVATE_KEY, { expiresIn: '1h' });
+        // Respond to request
+        res.status(200).json({ token, user: { id: user.id, username: user.username, email: user.email } });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error });
+    }
+}
+
+// Get User's Profile
+export const getUserProfile = async (req, res, next) => {
+    try {
+        // find authenticated user from database
+        const user = await UserModel.findById(req.user.id).select({ password: false });
+        // Respond to request
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        res.status(200).json(user);
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error });
+    }
+};
+
+// Update user's profile 
+export const updateUserProfile = async (req, res, next) => {
+    try {
+        const { username, phoneNumber, profilePicture } = updateProfileValidator.validate({
+            ...req.body,
+            avatar: req.file?.filename
+        });
+        if (error) {
+            return res.status(422).json(error);
+        }
+        await UserModel.findByIdAndUpadate(req.user.id, value);
+        res.json("User profile updated!");
+    } catch (error) {
+        next(error);
+    }
+}
+
+// Delete user account
+export const logoutUser = async (req, res, next) => {
+    try {
+        const user = await User.findById(req.user.id);
+        if (!user) {
+            return res.status(404).json({ messsage: 'User not found' });
+        }
+
+        await user.remove();
+        res.status(200).json({ message: 'User account deleted succeefully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error });
+    }
+};
+
+
+
+// register a new user
 // export const registerUser = async (req, res, next) => {
 //     try {
 //         // Validate user input
