@@ -2,12 +2,13 @@ import express from "express";
 // import dotenv from "dotenv";
 import mongoose from "mongoose";
 import cors from "cors";
-import userRouter from "./src/routes/user.js";
-
+import consultationRouter from "./src/routes/consultationRoutes.js";
+import professionalRouter from "./src/routes/professionalRoutes.js";
 
 // Connect to database
-mongoose.connect(process.env.MONGO_URI)
-
+await mongoose.connect(process.env.MONGO_URI)
+.then(() => console.log("Database connected successfully"))
+.catch((error) => console.log("Error connecting to database", error));
 // Create an express app
 const app = express();
 
@@ -16,7 +17,8 @@ app.use(express.json());
 app.use(cors());
 
 // Use routes
- app.use(userRouter)
+app.use(professionalRouter);
+app.use(consultationRouter);
 
 
 // Listen for incoming requests
