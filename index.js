@@ -1,11 +1,12 @@
 import express from "express";
+// import dotenv from "dotenv";
 import mongoose from "mongoose";
 import cors from "cors";
+import userRouter from "./src/routes/user.js";
+
 
 // Connect to database
-mongoose.connect(process.env.MONGO_URI);
-.then(() => console.log('Database connected'))
-.catch((err) => console.log('Database connection error', err));
+mongoose.connect(process.env.MONGO_URI)
 
 // Create an express app
 const app = express();
@@ -15,8 +16,7 @@ app.use(express.json());
 app.use(cors());
 
 // Use routes
-app.use();
-app.use();
+ app.use(userRouter)
 
 
 // Listen for incoming requests

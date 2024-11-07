@@ -6,15 +6,23 @@ const userSchema = new Schema({
     username: { type: String, required: true, unique: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    age: { type: Number, required: true },
-    sex: { type: String, enum: ["male", "female"], required: true },
-    country: { type: String, required: true },
-    symptoms: [{ type: Schema.Types.ObjectId, ref: "Symptom" }],
-    appointments: [{ type: Schema.Types.ObjectId, ref: "Appointment" }],
-    reminders: [{ type: Schema.Types.ObjectId, ref: "Reminder" }],
+    phoneNumber: { type: String },
+    birthCertificateNumber: { type: String, required: true, unique: true }, // Enforces uniqueness in the database
+    profilePicture: { type: String },
+    subscriptionType: { type: String, enum: ['Free', 'Premium'], default: 'Free' },
+    paymentDetails: {
+        method: { type: String, enum: ['MobileMoney', 'Bank'], default: 'MobileMoney' },
+        transactionHistory: [{ date: Date, amount: Number }]
+    },
+    createdAt: { type: Date, default: Date.now },
+    lastLogin: { type: Date },
+    status: { type: String, enum: ['Active', 'Suspended'], default: 'Active' }
 }, {
     timestamps: true
 });
+
+
 userSchema.plugin(toJSON);
 
 export const UserModel = model("User", userSchema);
+
