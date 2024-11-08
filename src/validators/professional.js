@@ -7,7 +7,7 @@ export const registerProfessionalValidator = Joi.object({
     password: Joi.string().required(),
     phoneNumber: Joi.number().required(),
     licenseNumber: Joi.number().required()
-});
+}).unknown();
 
 // Validate login
 export const loginProfessionalValidator = Joi.object({
@@ -23,9 +23,11 @@ export const getProfessionalProfileValidator = Joi.object({
 
 // Validate updateProfessionalProfile
 export const updateProfessionalProfileValidator = Joi.object({
-    fullName: Joi.string().required(),
-    email: Joi.string().email().required(),
-    password: Joi.string().required(),
-    phoneNumber: Joi.number().required()
+    fullName: Joi.string(),
+    email: Joi.string().email(),
+    password: Joi.string(),
+    phoneNumber: Joi.number(),
+    services: Joi.string(),
+    profilePicture: Joi.string()
 });
 
