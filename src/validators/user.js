@@ -1,22 +1,23 @@
 import Joi from "joi";
 
-// validate register
+// validate user registration
 export const registerUserValidator = Joi.object({
-    username: Joi.string().required(),
+    userName: Joi.string().required(),
     email: Joi.string().email().required(),
     password: Joi.string().required(),
-    role: Joi.string().valid("user"),
-    birthCertificateNumber: Joi.string().required()
-});
+    sex: Joi.string().required(),
+    role: Joi.string().valid("client"),
+    dateOfBirth: Joi.string().required()
+}).unknown();
 
-// validate login
+// validate user login
 export const loginUserValidator = Joi.object({
     email: Joi.string().email().required(),
     password: Joi.string().required()
 });
 
-// validate updateDashboard
+// validate user update
 export const updateProfileValidator = Joi.object({
-    name: Joi.string(),
-    avatar: Joi.string()
-});
+    userName: Joi.string(),
+    profilePicture: Joi.string()
+}).unknown();

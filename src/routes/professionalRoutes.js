@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { getAllProfessionals, getProfessionalProfile, loginProfessional, registerProfessional, updateProfessionalProfile } from "../controllers/professional.js"
-import { isAuthenticated } from '../middlewares/auth.js';
+import { isAuthenticated } from '../middlewares/authn.js';
 
 const professionalRouter = Router()
 

@@ -11,16 +11,13 @@ export const registerProfessional = async (req, res, next) => {
     if (error) {
       return res.status(422).json({ message: error.details[0].message });
     }
-
     // Check if the professional already exists
     const Professional = await professionalModel.findOne({ email: value.email });
     if (Professional) {
       return res.status(400).json({ message: 'Professional already exists!' });
     }
-
     // Hash password
     const hashedPassword = bcrypt.hashSync(value.password, 10);
-
     // Create new professional and save into database
     await professionalModel.create({
       ...value,
