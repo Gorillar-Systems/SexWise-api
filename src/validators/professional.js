@@ -5,6 +5,8 @@ export const registerProfessionalValidator = Joi.object({
     fullName: Joi.string().required(),
     email: Joi.string().email().required(),
     password: Joi.string().required(),
+    dateOfBirth: Joi.string().required(),
+    sex: Joi.string().required(),
     phoneNumber: Joi.number().required(),
     licenseNumber: Joi.number().required()
 }).unknown();
