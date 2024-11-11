@@ -6,11 +6,11 @@ export const bookConsultationValidator = Joi.object({
     consultationType: Joi.string().required(),
     date: Joi.string().required(),
     status: Joi.string()
-});
+}).unknown();
 
 // Validate updateConsultationStatus
-export const updateConsultationStatusValidator = Joi.object({
-    consultationType: Joi.string().required(),
-    date: Joi.string().required(),
+export const updateConsultationDetailsValidator = Joi.object({
+    consultationType: Joi.string(),
+    date: Joi.string(),
     status: Joi.string()
-});
+}).unknown();

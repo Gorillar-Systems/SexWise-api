@@ -23,6 +23,13 @@ export const registerProfessional = async (req, res, next) => {
       ...value,
       password: hashedPassword,
     });
+    // Send professional a confirmation email
+    await mailTransporter.sendMail({
+      from: process.env.USER_EMAIL,
+      to: value.email,
+      subject: "Professional Registration",
+      text: "Professional Registered Successfully!"
+  });
     res.status(201).json({ message: 'Professional registered successfully!' });
   } catch (error) {
     next(error);
