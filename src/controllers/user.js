@@ -21,7 +21,7 @@ export const registerUser = async (req, res, next) => {
         // Hash their password
         const hashedPassword = bcrypt.hashSync(value.password, 10);
         // Save user into database
-        await userModel.create({
+        const newUser = await userModel.create({
             ...value,
             password: hashedPassword
         });
@@ -33,7 +33,18 @@ export const registerUser = async (req, res, next) => {
             text: "User Registered Successfully!"
         });
         //Respond to request
-        res.json("User Registered!")
+        const token = jwt.sign(
+            { id: newUser.id },
+            process.env.JWT_PRIVATE_KEY,
+            { expiresIn: "24h" });
+        // Respond to request
+
+        const { password, ...rest } = newUser._doc;
+        const response = {
+            user: rest,
+            token
+        }
+        res.status(201).json(response);
     } catch (error) {
         next(error);
     }
@@ -55,17 +66,20 @@ export const loginUser = async (req, res, next) => {
         // Compare their passwords
         const correctPassword = bcrypt.compareSync(value.password, user.password);
         if (!correctPassword) {
-            return res.status(401).json("Incorrect Password!");}
-            // Generate a token for user
-            const token = jwt.sign(
-                { id: user.id },
-                process.env.JWT_PRIVATE_KEY,
-                { expiresIn: "2h" });
-            // Respond to request
-            res.json({
-                message: "User logged in!",
-                accessToken: token
-            });
+            return res.status(401).json("Incorrect Password!");
+        }
+        // Generate a token for user
+        const token = jwt.sign(
+            { id: user.id },
+            process.env.JWT_PRIVATE_KEY,
+            { expiresIn: "2h" });
+        // Respond to request
+        const { password, ...rest } = user._doc;
+        const response = {
+            user: rest,
+            token
+        }
+        res.status(200).json(response);
     } catch (error) {
         next(error);
     }
@@ -90,23 +104,23 @@ export const getUserProfile = async (req, res, next) => {
 // Update user's profile
 export const updateUserProfile = async (req, res, next) => {
     try {
-    //    // Validate user input
-    //    const { error, value } = updateUserProfileValidator.validate({
-    //     ...req.body,
-    //     profilePicture: req.file?.filename
-    //    });
-       // Hash password in the body if any
-       if (req.body?.password) {
-        req.body.password = bcrypt.hashSync(req.body.password, 10);
-       }
+        //    // Validate user input
+        //    const { error, value } = updateUserProfileValidator.validate({
+        //     ...req.body,
+        //     profilePicture: req.file?.filename
+        //    });
+        // Hash password in the body if any
+        if (req.body?.password) {
+            req.body.password = bcrypt.hashSync(req.body.password, 10);
+        }
 
-    //    if (error) {
-    //     return res.status(422).json(error);
-    //    }
-       // Update user profile
-       await userModel.findByIdAndUpdate(req.auth.id, req.body);
-       // Respond to request
-       res.json("User profile updated!");
+        //    if (error) {
+        //     return res.status(422).json(error);
+        //    }
+        // Update user profile
+        await userModel.findByIdAndUpdate(req.auth.id, req.body);
+        // Respond to request
+        res.json("User profile updated!");
     } catch (error) {
         next(error);
     }

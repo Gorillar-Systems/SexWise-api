@@ -22,32 +22,32 @@ export const hasPermission = (action) => {
             if (!professional.role) {
                 return res.status(400).json({ message: "Professional role not defined!" });
             }
-console.log("Generated token for professional:", {
-    id: professional.id,
-    role: professional.role
-})
-// Use professional role to define the permission
-const permission = permissions.find(value => value.role === professional.role);
-if (!permission) {
-    return res.status(404).json({
-        message: `No permissions found for role: ${professional.role}`
-    });
-}
-// Check if professional has the required permission
-if (!permission.actions.includes(action)) {
-    return res.status(403).json({
-        message: `Action "${action}" not allowed for role "${professional.role}"`
-    });
-}
-// If all checks pass, proceed
-next()   
-} catch (error) {
-    console.error('Permission check error:', error);
-    return res.status(500).json({
-        message: 'Error checking permissions',
-        error: error.message
-    });
-}
+            console.log("Generated token for professional:", {
+                id: professional.id,
+                role: professional.role
+            })
+            // Use professional role to define the permission
+            const permission = permissions.find(value => value.role === professional.role);
+            if (!permission) {
+                return res.status(404).json({
+                    message: `No permissions found for role: ${professional.role}`
+                });
+            }
+            // Check if professional has the required permission
+            if (!permission.actions.includes(action)) {
+                return res.status(403).json({
+                    message: `Action "${action}" not allowed for role "${professional.role}"`
+                });
+            }
+            // If all checks pass, proceed
+            next()
+        } catch (error) {
+            console.error('Permission check error:', error);
+            return res.status(500).json({
+                message: 'Error checking permissions',
+                error: error.message
+            });
+        }
     };
 };
 
@@ -58,7 +58,7 @@ export const userPermission = (action) => {
             // Find user from database
             const user = await userModel.findById(req.auth.id);
             // Use the user role to find their permission
-            const permission = permissions.find((value )=> value.role === user.role);
+            const permission = permissions.find((value) => value.role === user.role);
             if (!permission) {
                 return res.status(403).json("No permission found!");
             }

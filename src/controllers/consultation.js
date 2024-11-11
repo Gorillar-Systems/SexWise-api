@@ -1,10 +1,10 @@
-import mongoose from "mongoose";
 import { consultationModel } from "../models/consultationModel.js";
-import { bookConsultationValidator, updateConsultationStatusValidator } from "../validators/consultation.js";
+import { bookConsultationValidator, updateConsultationDetailsValidator } from "../validators/consultation.js";
+import { userModel } from "../models/userModel2.js";
 
 export const bookConsultation = async (req, res, next) => {
   try {
-    const { userId, consultationType, date, status } = req.body;
+    const { userId, } = req.body;
 
     // Validate user inputs
     const { error, value } = bookConsultationValidator.validate({
@@ -15,7 +15,7 @@ export const bookConsultation = async (req, res, next) => {
     }
 
     // Check if user exist
-    const user = await User.findById(userId);
+    const user = await userModel.findById(userId);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -25,9 +25,10 @@ export const bookConsultation = async (req, res, next) => {
       ...value,
       user: req.auth.id
     });
-    res.status(201).json({ 
-      message: 'Consultation booked successfully', 
-      consultation: newConsultation });
+    res.status(201).json({
+      message: 'Consultation booked successfully',
+      consultation: newConsultation
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
     next(error)
@@ -36,9 +37,9 @@ export const bookConsultation = async (req, res, next) => {
 
 export const getConsultationDetails = async (req, res, next) => {
   try {
-    const consultation = await consultationModel.findById(req.auth.consultationId)
-      .populate('userId', 'fullName email');
-    
+    const consultation = await consultationModel.findById(req.params.consultationId)
+      .populate('userId', 'userName email');
+
     if (!consultation) {
       return res.status(404).json({ message: 'Consultation not found' });
     }
@@ -49,10 +50,10 @@ export const getConsultationDetails = async (req, res, next) => {
   }
 };
 
-export const updateConsultationStatus = async (req, res, next) => {
+export const updateConsultationDetails = async (req, res, next) => {
   try {
     // Validate update data
-    const { error, value } = updateConsultationStatusValidator.validate({
+    const { error, value } = updateConsultationDetailsValidator.validate({
       ...req.body
     });
     if (error) {
@@ -60,9 +61,9 @@ export const updateConsultationStatus = async (req, res, next) => {
     }
 
     // Update the booked consultation
-    const updatedConsultation = await consultationModel.findOneandUpdate(
-      {_id: id, user: req.auth.consultationId},
-      {...value},
+    const updatedConsultation = await consultationModel.findOneAndUpdate(
+      { userId: req.auth.id, _id: req.params.consultationId },
+      { ...value },
       { new: true }
     );
 
@@ -70,8 +71,8 @@ export const updateConsultationStatus = async (req, res, next) => {
       return res.status(404).json({ message: 'Consultation not found' });
     }
 
-    res.status(200).json({ 
-      message: 'Consultation status updated successfully',
+    res.status(200).json({
+      message: 'Consultation details updated successfully',
       consultation: updatedConsultation
     });
   } catch (error) {
@@ -105,21 +106,21 @@ export const getProfessionalConsultations = async (req, res, next) => {
 
 export const cancelConsultation = async (req, res, next) => {
   try {
-    const consultation = await Consultation.findById(req.params.consultationId);
+    const consultation = await consultationModel.findById(req.params.consultationId);
 
     if (!consultation) {
       return res.status(404).json({ message: 'Consultation not found' });
     }
 
-    if (consultation.userId.toString() !== req.user.id) {
+    if (consultation.userId.toString() !== req.auth.id) {
       return res.status(403).json({ message: 'Unauthorized access' });
     }
 
-    if (consultation.status === 'Completed') {
+    if (consultation.status === 'completed') {
       return res.status(400).json({ message: 'Completed consultations cannot be canceled' });
     }
 
-    consultation.status = 'Cancelled';
+    consultation.status = 'cancelled';
     await consultation.save();
 
     res.status(200).json({ message: 'Consultation cancelled successfully' });
