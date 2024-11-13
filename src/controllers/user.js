@@ -30,7 +30,7 @@ export const registerUser = async (req, res, next) => {
             from: process.env.USER_EMAIL,
             to: value.email,
             subject: "User Registration",
-            text: "User Registered Successfully!"
+            text: "User registerd successfully!"
         });
         //Respond to request
         const token = jwt.sign(

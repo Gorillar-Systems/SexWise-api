@@ -21,9 +21,9 @@ app.use(userRouter)
 app.use(professionalRouter);
 app.use(consultationRouter);
 
-
+const PORT = process.env.PORT
 
 // Listen for incoming requests
-app.listen(6000, () => {
-    console.log("App is listening on port 6000");
+app.listen(PORT, () => {
+    console.log(`App is listening on port ${PORT}`);
 });
