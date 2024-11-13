@@ -1,8 +1,9 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import mongoose from "mongoose";
 import { professionalModel } from "../models/professionalModel.js";
 import { registerProfessionalValidator, loginProfessionalValidator, getProfessionalProfileValidator, updateProfessionalProfileValidator } from "../validators/professional.js";
+import { mailTransporter } from "../utils/mail.js";
+import { registerProfessionalEmailTemplate } from "../utils/templateProfessional.js";
 
 export const registerProfessional = async (req, res, next) => {
   try {
@@ -23,12 +24,17 @@ export const registerProfessional = async (req, res, next) => {
       ...value,
       password: hashedPassword,
     });
+    const emailContent = `
+    <h1>Welcome to SexWise Platform!</h1>
+                <p>Thank you for registering with us. We’re glad to have you onboard.</p>
+                <p>To complete your registration, please verify your email by logging in</p>`
     // Send professional a confirmation email
     await mailTransporter.sendMail({
-      from: process.env.USER_EMAIL,
+      from: `SEXWISE <sexwise69@gmail.com>`,
       to: value.email,
       subject: "Professional Registration",
-      text: "Professional Registered Successfully!"
+      html: registerProfessionalEmailTemplate(emailContent)
+  
   });
     res.status(201).json({ message: 'Professional registered successfully!' });
   } catch (error) {
