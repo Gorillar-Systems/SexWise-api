@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import { loginUserValidator, registerUserValidator } from "../validators/user.js";
 import { mailTransporter } from "../utils/mail.js";
 import mongoose from "mongoose";
+import { registerEmailTemplate } from "../utils/templates.js";
 
 // Register User
 export const registerUser = async (req, res, next) => {
@@ -25,14 +26,22 @@ export const registerUser = async (req, res, next) => {
             ...value,
             password: hashedPassword
         });
+
+        // content of the html for the email
+        const emailContent = `
+        <h2> Welcome to SexWise Platform! </h2>
+                 <p>We’re thrilled to have you on board and excited for you to start exploring our services... </p>
+                 <p>To complete your registration, please verify your email by logging in</p>
+        `;
         // Send user confirmation email
         await mailTransporter.sendMail({
-            from: process.env.USER_EMAIL,
+            from: 'SexWise <sexwise69@gmail.com>',
             to: value.email,
             subject: "User Registration",
-            text: "User Registered Successfully!"
+            html: registerEmailTemplate(emailContent)
         });
-        //Respond to request
+
+      //  Respond to request
         const token = jwt.sign(
             { id: newUser.id },
             process.env.JWT_PRIVATE_KEY,
@@ -43,12 +52,12 @@ export const registerUser = async (req, res, next) => {
         const response = {
             user: rest,
             token
-        }
+       }
         res.status(201).json(response);
     } catch (error) {
         next(error);
     }
-}
+};
 
 // User login
 export const loginUser = async (req, res, next) => {
