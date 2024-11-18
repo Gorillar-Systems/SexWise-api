@@ -4,8 +4,6 @@ import { userModel } from "../models/userModel2.js";
 
 export const bookConsultation = async (req, res, next) => {
   try {
-    const { userId, } = req.body;
-
     // Validate user inputs
     const { error, value } = bookConsultationValidator.validate({
       ...req.body
@@ -15,7 +13,7 @@ export const bookConsultation = async (req, res, next) => {
     }
 
     // Check if user exist
-    const user = await userModel.findById(userId);
+    const user = await userModel.findById(req.auth.id);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
