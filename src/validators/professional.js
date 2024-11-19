@@ -8,7 +8,7 @@ export const registerProfessionalValidator = Joi.object({
     dateOfBirth: Joi.string().required(),
     sex: Joi.string().required(),
     phoneNumber: Joi.number().required(),
-    licenseNumber: Joi.number().required()
+    licenseNumber: Joi.string().required()
 }).unknown();
 
 // Validate login
