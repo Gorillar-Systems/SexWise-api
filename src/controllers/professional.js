@@ -20,7 +20,7 @@ export const registerProfessional = async (req, res, next) => {
     // Hash password
     const hashedPassword = bcrypt.hashSync(value.password, 10);
     // Create new professional and save into database
-    await professionalModel.create({
+    const newUser = await professionalModel.create({
       ...value,
       password: hashedPassword,
     });
@@ -34,9 +34,20 @@ export const registerProfessional = async (req, res, next) => {
       to: value.email,
       subject: "Professional Registration",
       html: registerProfessionalEmailTemplate(emailContent)
-  
-  });
-    res.status(201).json({ message: 'Professional registered successfully!' });
+
+    });
+    const token = jwt.sign(
+      { id: newUser.id },
+      process.env.JWT_PRIVATE_KEY,
+      { expiresIn: "24h" });
+    // Respond to request
+
+    const { password, ...rest } = newUser._doc;
+    const response = {
+      user: rest,
+      token
+    }
+    res.status(201).json(response);
   } catch (error) {
     next(error);
   }
